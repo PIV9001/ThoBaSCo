@@ -159,7 +159,7 @@ nmax = 1        #harmonic
 acc = 10
 N0 = 7
 
-###   Bill microbunching
+###   microbunching test
 #lph = 1380e-9
 ##l0 = lph*4*gamma**2
 #l0 = lph*4*gamma**2

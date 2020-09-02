@@ -2,7 +2,7 @@
 """
 Created on Thu Aug 16 16:24:41 2018
 
-@author: kwl
+@author: Paul Volz
 """
 import time
 import numpy as np
@@ -28,42 +28,45 @@ hev = 4.135667662e-15       #Planck Constant h in eV*s
 em = 0.51099895e6           #rest mass energy of electreon in eV
 
 #roll bunch here
-Ne = 1       #number of electrons
+Ne = 1      #number of electrons considered in the simulation
+            #if the number is less than the particles in the bunch-file,
+            #the first Ne entries of the file will be used
 
 #filename for reading ASTRA-files
-filename = 'Mesa.ini'
-#filename = 'Sdalinac.ini'
-#filename = 'gauss_low_noise.ini'
 
-fname = filename.strip('.ini')
+
+filename = 'Sdalinac.ini'
+
+
+fname = filename.strip('.ini')  #adjust this according to your file name
 
 ###############################################################################
 ###             reading ASTRA files                                         ###
 ###############################################################################
-# INPUT #######################################################################
-#filename = 'fu1380nm-35-10pc.ini'
-
-###############################################################################
 
 #read ASTRA-file using np.genfromtxt
 data = np.genfromtxt(filename)
-#print(data[0,:])
+
 
 #splitting columns in seperate arrays
 #coordinates
-horpos = data[:, 0].copy()
+horpos = data[:, 0].copy()  #horizontal particle position
 horpos = np.array(horpos)
-#print(np.shape(horpos))
-verpos = data[:, 1].copy()
+
+verpos = data[:, 1].copy()  #vertical particle position
 verpos = np.array(verpos)
-longpos = data[:, 2].copy()
+
+longpos = data[:, 2].copy() #longitudinal particle position
 longpos = np.array(longpos)
+
 #momenta
-phor = data[:,3].copy()
+phor = data[:,3].copy()     #horizontal particle momentum
 phor = np.array(phor)
-pvert = data[:,4].copy()
+
+pvert = data[:,4].copy()    #vertical particle momentum
 pvert = np.array(pvert)
-envec = data[:,5].copy()       #longitudinal momentum
+
+envec = data[:,5].copy()    #longitudinal particle momentum
 envec = np.array(envec)
 
 # CONVERTING ##################################################################
@@ -76,35 +79,38 @@ horpos[0] = 0
 verpos[0] = 0
 longpos[0] = 0
 #
-kin = np.copy(envec[0])
+kin = np.copy(envec[0])     #kinetic energy of reference particle
 #
 envec = envec + kin
 envec[0] = kin
+
 #convert eV to Lorentz factor
 gvec = envec/em
 #
 xv = horpos
 yv = verpos
 zv = longpos
+
+
 #pencil beam:
 #xv = np.zeros(Ne)
 #yv = np.zeros(Ne)
 #zv = np.zeros(Ne)
 #phor = np.zeros(Ne)
 #pvert = np.zeros(Ne)
-#gvec = np.ones(Ne)*kin/511e3
+#gvec = np.ones(Ne)*kin/em
 ###############################################################################
 
-#gamma = gvec[0]
-#bet0 = np.sqrt(1-1/gamma**2)
+gamma = gvec[0]
+bet0 = np.sqrt(1-1/gamma**2)
 
 
 ###############################################################################
 ################         debug parameters        ##############################
 ###############################################################################
 
-gamma = gvec[0]
-bet0 = np.sqrt(1-1/gamma**2)
+#gamma = gvec[0]
+#bet0 = np.sqrt(1-1/gamma**2)
 
 #a0 = 2
 
@@ -122,60 +128,62 @@ bet0 = np.sqrt(1-1/gamma**2)
 ###############################################################################
 ###    tests with emittance and energy spread              ####################
 ###############################################################################
-Ne2 = 200
-ES = 0#50e-2
-emit = (0/180)*np.pi
-
-
-EScalc = np.std(gvec)/gamma
-
-stdm = 50
-
-epsnk0 = 1e-6
-enkvar = epsnk0*stdm
-
-
-envect = np.linspace((1-ES)*kin,(1+ES)*kin,Ne2)
-gvect = envect/em
-
-iavec = np.linspace(0,emit,Ne2)
-
-xvt = np.ones_like(envect)*xv[0]
-yvt = np.ones_like(envect)*yv[0]
-zvt = np.ones_like(envect)*zv[0]
-
-
-
-postdx = np.std(horpos)
-postdy = np.std(verpos)
-postdz = np.std(longpos)
-
-bfx = postdx**2*gamma/epsnk0
-
-sigx = np.sqrt(enkvar*bfx/gamma)
-
-
-#xvt = np.random.normal(0,sigx,envect.shape)
-yvt = np.random.normal(0,sigx,envect.shape)
-#zvt = np.random.normal(0,sigx,envect.shape)
-
-#xvt = np.linspace(-postdx/2,postdx/2,Ne2)*stdm
-#yvt = np.linspace(-postdx/2,postdx/2,Ne2)*stdm
-#zvt = np.linspace(-postdx/2,postdx/2,Ne2)*stdm
-
-#single electron offset
-#xvt = xvt + postdx*stdm
-#yvt = yvt + postdy*stdm
-#zvt = zvt + postdz*stdm
-
-
-
-#xvt = np.ones_like(envect)*postdx*500
-#yvt = np.ones_like(envect)*postdy*200
-
-phort = np.ones_like(envect)*phor[0]
-pvertt = np.ones_like(envect)*pvert[0]
-
+#Ne2 = 1#200
+#ES = 0#50e-2
+#emit = (0/180)*np.pi
+#
+#
+#EScalc = np.std(gvec)/gamma
+#
+#stdm = 50
+#
+#epsnk0 = 1e-6
+#enkvar = epsnk0*stdm
+#
+#
+##envect = np.linspace((1-ES)*kin,(1+ES)*kin,Ne2)
+#envect = np.random.normal(kin,ES,Ne2)
+#
+#gvect = envect/em
+#
+#iavec = np.linspace(0,emit,Ne2)
+#
+#xvt = np.ones_like(envect)*xv[0]
+#yvt = np.ones_like(envect)*yv[0]
+#zvt = np.ones_like(envect)*zv[0]
+#
+#
+##getting standard deviation of electron position
+#postdx = np.std(horpos)
+#postdy = np.std(verpos)
+#postdz = np.std(longpos)
+#
+##
+#bfx = postdx**2*gamma/epsnk0
+#sigx = np.sqrt(enkvar*bfx/gamma)
+#
+#
+##xvt = np.random.normal(0,sigx,envect.shape)
+#yvt = np.random.normal(0,sigx,envect.shape)
+##zvt = np.random.normal(0,sigx,envect.shape)
+#
+##xvt = np.linspace(-postdx/2,postdx/2,Ne2)*stdm
+##yvt = np.linspace(-postdx/2,postdx/2,Ne2)*stdm
+##zvt = np.linspace(-postdx/2,postdx/2,Ne2)*stdm
+#
+##single electron offset
+##xvt = xvt + postdx*stdm
+##yvt = yvt + postdy*stdm
+##zvt = zvt + postdz*stdm
+#
+#
+#
+##xvt = np.ones_like(envect)*postdx*500
+##yvt = np.ones_like(envect)*postdy*200
+#
+#phort = np.ones_like(envect)*phor[0]
+#pvertt = np.ones_like(envect)*pvert[0]
+#
 
 
 ###############################################################################
@@ -184,18 +192,21 @@ pvertt = np.ones_like(envect)*pvert[0]
 ###############################################################################
 #                       Laser Parameters
 ###############################################################################
-a0 = 2.
+
+
+a0 = 2.                 #laser strength parameter
 
 
 #Mesa
 #a0 = .5
 #
 #
-l0 = 575e-9
+l0 = 575e-9             #central wavelength of laser pulse in meter
 #l0 = lph*4*gamma**2
 #l0 = lph*4*gvec[0]**2
-w0 = 2*np.pi*c/l0
-N0 = 7
+w0 = 2*np.pi*c/l0       #central frequency of laser pulse
+N0 = 7                  #number of oscillations of central frequency 
+                        #(laser pulse length)
 
 ##sDalinac
 #a0 = 2
@@ -223,13 +234,15 @@ wmid = gamma**2*w0*(1+bet0)**2/(1+.5*a0**2)
 
 #phi = 0
 
-nmax = 3        #harmonic
-acc = 10
+nmax = 3        #number of calculated harmonics
+acc = 10        #calculation accuracy for sum of bessel functions
+                #only applies to linearly polarized laser pulses
 
-dist = 12
+dist = 12       #distance of detector center from interaction point of
+                #reference particle in meter
 ###############################################################################
 
-wsize = 300
+wsize = 300     #spectral resolution
 
 # 9th harmonic
 #wvec = np.linspace(0,5,wsize)*(w0*4*gamma**2) #a0 = 0.5
@@ -237,9 +250,11 @@ wsize = 300
 
 # 3rd harmonic
 wvec = np.linspace(0.01,1.2,wsize)*(w0*4*gamma**2) #a0 = 2
+#wvec is the array containing all the frequencies calculated
 
 #tvec = np.linspace(0,2,wsize)/gamma
-tgrange = 3   #Theta*gamma range
+tgrange = 3   #Theta*gamma range, observation angle is simulated between  
+              #0 and tgrange
 
 
 #establishing canvas for reference particle
@@ -247,7 +262,7 @@ evec0 = np.array([xv[0], yv[0], zv[0]])
 bvec0 = np.array([phor[0],pvert[0],envec[0]])
 #bvec0 = [envec[0],pvert[0],phor[0]]
 
-#evec = [0, 0, 0,0,0,gamma] #debug
+
 tvplot, phi = pathphase_lin_spec(dist, tgrange, wsize, evec0, bvec0, gamma)
 
 
@@ -345,42 +360,55 @@ wmesh,tmesh = np.meshgrid(wvec,tvplot)
 ###############################################################################
 #      arb angle lin calc loop                         ########################
 ###############################################################################
-tic = time.perf_counter()
+tic = time.perf_counter()           #measuring calculation time
 
-Intsum = np.zeros((wsize,wsize))
+Intsum = np.zeros((wsize,wsize))    #creating Intensity array
 
 # calculation loop for direct file reads
+"""
+This calculation loop is used when importing electron bunch data from file.
+"""
 
-#for cnt in range(Ne):
-#    evec = np.array([xv[cnt], yv[cnt], zv[cnt]])
-#    bvec = np.array([phor[cnt],pvert[cnt],envec[cnt]])
+for cnt in range(Ne):
+    evec = np.array([xv[cnt], yv[cnt], zv[cnt]])
+    #array containing positional information for all particles
+    bvec = np.array([phor[cnt],pvert[cnt],envec[cnt]])
+    #array containing momentum information for all particles
+    #
+    #calculating angles theta and phi via path length to detector pixels
+    tvec, phi = pathphase_lin_spec(dist, tgrange, wsize, evec, bvec, gamma)
+    #
+#    print('phi')
+#    print(phi)
+    #
+    #rotating momentum array according to incident angles
+    bvec = np.dot(rotmat,bvec)
+    
+    #calculating complex amplitudes of radiation
+    Atheta, Aphi = arb_angle_lin_spec(evec, bvec, wvec, tvec, phi, a0, w0, gvec[cnt], N0, acc, nmax)
+    #
+    #incoherent addition
+    Intsum += np.absolute(Atheta)**2 + np.absolute(Aphi)**2
+    print(cnt)
+
+# calculation loop for altered beam paraameters
+"""
+This calculation loop is used when generating electron bunch data in the 
+'tests with emittance and energy spread' section.
+"""
+
+#for cnt in range(Ne2):
+#    evec = np.array([xvt[cnt], yvt[cnt], zvt[cnt]])
+#    bvec = np.array([phort[cnt],pvertt[cnt],envect[cnt]])
 #    #
 #    tvec, phi = pathphase_lin_spec(dist, tgrange, wsize, evec, bvec, gamma)
 #    #
-##    print('phi')
-##    print(phi)
+#    bvec = np.dot(rot_y(iavec[cnt]),bvec)
 #    #
-#    bvec = np.dot(rotmat,bvec)
-#    Atheta, Aphi = arb_angle_lin_spec(evec, bvec, wvec, tvec, phi, a0, w0, gvec[cnt], N0, acc, nmax)
+#    Atheta, Aphi = arb_angle_lin_spec(evec, bvec, wvec, tvec, phi, a0, w0, gvect[cnt], N0, acc, nmax)
 #    #
-#    #incoherent addition
 #    Intsum += np.absolute(Atheta)**2 + np.absolute(Aphi)**2
 #    print(cnt)
-
-# calculation loop for altered beam paraameters
-
-for cnt in range(Ne2):
-    evec = np.array([xvt[cnt], yvt[cnt], zvt[cnt]])
-    bvec = np.array([phort[cnt],pvertt[cnt],envect[cnt]])
-    #
-    tvec, phi = pathphase_lin_spec(dist, tgrange, wsize, evec, bvec, gamma)
-    #
-    bvec = np.dot(rot_y(iavec[cnt]),bvec)
-    #
-    Atheta, Aphi = arb_angle_lin_spec(evec, bvec, wvec, tvec, phi, a0, w0, gvect[cnt], N0, acc, nmax)
-    #
-    Intsum += np.absolute(Atheta)**2 + np.absolute(Aphi)**2
-    print(cnt)
    
 toc = time.perf_counter()
 print('elapsed time:')
@@ -392,47 +420,46 @@ print(toc-tic)
 
 
 ###############################################################################
-# direct intensity
-###############################################################################
-
-#Int = fullcrude_amp(wvec, tvec, phi, a0, w0, gamma, N0, nmax, acc)
-
-
-
-###############################################################################
 ############          saving data           ###################################
 ###############################################################################
-axis1 = wmesh/(4*gamma**2*w0)
-axis2 = tmesh*gamma
+"""
+this is used for saving data to files, adjust according to your path and
+preferences
+"""
 
-
-#path = '/home/Data/HU-Box/Uni/Masterarbeit/python/pictures/05Simulation/sdalin_spec_offset_comp/' #work pc
-path = 'D:/HU-Box/HU-Box/Uni/Masterarbeit/python/pictures/05Simulation/emittance_variation/' # personal desk top
-
-#sdalin:
-#name1 = 'sdalin_{}e_'.format(Ne2)
-##name2 = 'x_spread_x{}_'.format(stdm)
-#name2 = 'y_spread_x{}_'.format(stdm)
-
-#MESA:
-name1 = 'MESA_lin_{}e_'.format(Ne2)
-#name2 = 'x_emit_x{}_'.format(stdm)
-name2 = 'y_emit_x{}_'.format(stdm)
-
+#axis1 = wmesh/(4*gamma**2*w0)
+#axis2 = tmesh*gamma
 #
-np.save(path+name1+name2+'int', Intsum)
-np.save(path+name1+name2+'axis1', axis1)
-np.save(path+name1+name2+'axis2', axis2)
+#
+##path = '/home/Data/HU-Box/Uni/Masterarbeit/python/pictures/05Simulation/sdalin_spec_offset_comp/' #work pc
+##path = 'D:/HU-Box/HU-Box/Uni/Masterarbeit/python/pictures/05Simulation/emittance_variation/' # personal desk top
+#
+##sdalin:
+##name1 = 'sdalin_{}e_'.format(Ne2)
+###name2 = 'x_spread_x{}_'.format(stdm)
+##name2 = 'y_spread_x{}_'.format(stdm)
+#
+##MESA:
+#name1 = 'MESA_lin_{}e_'.format(Ne2)
+##name2 = 'x_emit_x{}_'.format(stdm)
+#name2 = 'y_emit_x{}_'.format(stdm)
+#
+##
+#np.save(path+name1+name2+'int', Intsum)
+#np.save(path+name1+name2+'axis1', axis1)
+#np.save(path+name1+name2+'axis2', axis2)
 
 
 ###############################################################################
 ################   plotting    ################################################
 ###############################################################################
-axis1 = wmesh/(4*gamma**2*w0)
-axis2 = tmesh*gamma
 
+#defining plotting data
+axis1 = wmesh/(4*gamma**2*w0)   
+axis2 = tmesh*gamma             
 
-xysize = 12
+#font sizes for plot
+xysize = 12                 
 zsize = 12
 
 
@@ -465,18 +492,6 @@ ax.set_zlabel('intensity',fontsize=zsize)
 
 
 
-
-
-
-
-
-
-
-
 plt.show()
-
-
-
-
 
 

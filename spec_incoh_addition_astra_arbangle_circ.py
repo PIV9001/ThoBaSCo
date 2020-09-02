@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 from scipy import special as sp
 from mpl_toolkits.mplot3d import Axes3D
 from mpl_toolkits.mplot3d import axes3d
-from spec_dist_amp import spec_dist_amp
+#from spec_dist_amp import spec_dist_amp
 from arb_angle_circ_amp import arb_angle_circ_spec
 from ThoBaSCo_kernel import a0_freq_corr
 from ThoBaSCo_kernel import pathphase_circ_spec
